@@ -78,4 +78,4 @@ names(result) <- lapply(names(result),function(x){paste(x,"Average")})
 result <- cbind(subjects.col,activities.col,result)
 names(result)[1:2] <- c("Subject ID", "Activity Name")
 
-write.table(result, file = "result.txt", row.names = FALSE)
+write.table(result, file = "Cleaned Sensory Data.txt", row.names = FALSE)
