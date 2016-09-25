@@ -1,3 +1,6 @@
+# Loading required packages
+library(dplyr)
+
 # Seting path to data direcotry
 main.path <- "./UCI HAR Dataset";
 train.path <- paste(main.path, "train", sep = "/")
@@ -15,6 +18,7 @@ y.test <- read.table(paste(test.path,"y_test.txt", sep = "/"), header = F)
 
 # Reading features/variables names
 features <- read.table(paste(main.path,"features.txt", sep = "/"), header = F)
+
 # Reading activity names
 activity.labels <- read.table(paste(main.path,"activity_labels.txt", sep = "/"), header = F)
 
@@ -58,24 +62,11 @@ x.names <- gsub("\\-Z$", "Z Axis", x.names)
 x.names <- gsub("\\s$", "", x.names)
 names(X) <- x.names
 
+# Calculating averages of all columns grouped by each subject and activity combination
+result <- X %>% group_by(`Subject ID`, `Activity Name`) %>% summarise_each(funs(mean), 2:(dim(X)[2]-1))
 
-result <- data.frame()
-subjects.col <- c()
-activities.col <- c()
-for(i in unique(X$`Subject ID`)) {
-    for(j in unique(X$`Activity Name`)) {
-        subjects.col <- c(subjects.col, i)
-        activities.col <- c(activities.col, j)
-        result <- rbind(result,
-                        X %>%
-                            filter(`Subject ID` == i & `Activity Name` == j) %>%
-                            summarise_each(funs(mean), 2:(dim(X)[2]-1))
-        )
-    }
-}
-result[is.na(result)] <- 0
-names(result) <- lapply(names(result),function(x){paste(x,"Average")})
-result <- cbind(subjects.col,activities.col,result)
-names(result)[1:2] <- c("Subject ID", "Activity Name")
+# Adding 'Average' for calculated column names
+names(result)[3:dim(result)[2]] <- lapply(names(result)[3:dim(result)[2]], function(x){paste(x,"Average")})
 
+# Outputing result data frame to working direcotry
 write.table(result, file = "Cleaned Sensory Data.txt", row.names = FALSE)
